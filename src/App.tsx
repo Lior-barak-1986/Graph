@@ -1,24 +1,47 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+// @ts-nocheck
+
+import React, { useEffect, useRef, useState } from "react";
+
+// import logo from "./logo.svg";
+import "./App.css";
+import { Data, Link, Node } from "./Interfaces/Node";
+import { fetchData } from "./lib/api";
+import ForceGraph from "./lib/d3";
 
 function App() {
+  const [data, setData] = useState<Data>(null);
+  const [links, setLinks] = useState<Array<Link>>(null);
+  const [nodes, setNodes] = useState<Array<Node>>(null);
+  const svg = useRef();
+  useEffect(() => {
+    const fetchServer = async () => {
+      const tempData = await fetchData();
+      setData(tempData);
+      setNodes(tempData.nodes);
+      setLinks(
+        tempData.links.map((link) => {
+          link["source"] = link["from"];
+          link["target"] = link["to"];
+          return link;
+        })
+      );
+    };
+    fetchServer();
+  }, []);
+  useEffect(() => {
+    if (svg.current) {
+      nodes &&
+        links &&
+        svg.current.appendChild(ForceGraph({dataLinks: links,data: nodes},{}));
+    }
+  });
+
+  
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      {}
+      <div ref={svg} >
+        </div>
     </div>
   );
 }
