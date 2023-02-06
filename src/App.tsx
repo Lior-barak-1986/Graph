@@ -6,7 +6,7 @@ import React, { useEffect, useRef, useState } from "react";
 import "./App.css";
 import { Data, Link, Node } from "./Interfaces/Node";
 import { fetchData } from "./lib/api";
-import ForceGraph from "./lib/d3";
+import CreateGraph from "./lib/d3";
 
 function App() {
   const [data, setData] = useState<Data>(null);
@@ -32,9 +32,9 @@ function App() {
     if (svg.current) {
       nodes &&
         links &&
-        svg.current.appendChild(ForceGraph({dataLinks: links,data: nodes},{}));
+        svg.current.appendChild(CreateGraph({dataLinks: links,data: nodes},{}));
     }
-  });
+  }, [nodes,links]);
 
   
   return (
