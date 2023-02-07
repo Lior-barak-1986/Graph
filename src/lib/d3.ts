@@ -26,7 +26,7 @@ function CreateGraph(
     fill: data[i].fill,
     x: (width / 3.5) * Math.sin(((2 * Math.PI) / data.length) * i),
     y: (height / 3.5) * Math.cos(((2 * Math.PI) / data.length) * i),
-    properties: data[i].properties
+    properties: data[i].properties,
   }));
   const links = d3.map(dataLinks, (link, i) => {
     const nodeSource = nodes.find((node) => node.id === link.source);
@@ -44,39 +44,13 @@ function CreateGraph(
     };
   });
 
-  // Construct the scales.
-  const color = d3.scaleOrdinal(
-    new Array(nodes.length).map((_, i) => i + 1),
-    colors
-  );
-
-  const simulation = d3.forceSimulation(nodes);
-
   const svg = d3
     .create("svg")
     .attr("width", width)
     .attr("height", height)
     .attr("viewBox", [-width / 2, -height / 2, width, height])
     .attr("style", "max-width: 100%; height: auto;");
-  const linkage = d3
-    .linkHorizontal()
-    .source((d) => [d.source[0], d.source[1]])
-    .target((d) => [d.target[0], d.target[1]]);
-  links.forEach(
-    (link) =>
-      svg
-        .append("g")
-        .selectAll("path")
-        .data([link])
-        .join("path")
-        //@ts-ignore
-        .attr("d", linkage)
-        .attr("fill", link.color ||"#999")
-        .attr("width", 10)
-    // .attr("stroke-linecap", "round")
-    // .attr("stroke-width",  '2')
-    // .classed("link", true);
-  );
+
   nodes.forEach((node) => {
     svg
       .append("g")
@@ -92,9 +66,48 @@ function CreateGraph(
       .attr("x", node.x)
       .attr("y", node.y)
       .attr("width", 50)
-      .attr("height", 140)
+      .attr("height", 50)
       .append("title")
-      .text((JSON.stringify(node.id) + '\n'+ (node.properties ?  "Properties: \n" + JSON.stringify(node.properties) : "")).replaceAll('\"',''));
+      .text(
+        (
+          JSON.stringify(node.id) +
+          "\n" +
+          (node.properties
+            ? "Properties: \n" + JSON.stringify(node.properties)
+            : "")
+        ).replaceAll('"', "")
+      );
+  });
+  svg
+    .append("defs")
+    .append("marker")
+    .attr("id", "arrow")
+    .attr("viewBox", [0, 0, 10, 10])
+    .attr("fill", "#ffffff")
+    .attr("refX", 5)
+    .attr("refY", 5)
+    .attr("markerWidth", 10)
+    .attr("markerHeight", 10)
+    .attr("orient", "auto-start-reverse")
+    .append("path")
+    .attr("d", " M 0 0 L 10 5 L 0 10 z");
+  const linkage = d3
+    .linkHorizontal()
+    .source((d) => [d.source[0], d.source[1]])
+    //@ts-ignore
+    .target((d) => [d.target[0], d.target[1]]);
+  links.forEach((link) => {
+    svg
+      .append("g")
+      .selectAll("path")
+      .data([link])
+      .join("path")
+      .attr("stroke", link.color || "#99")
+      // @ts-ignore
+      .attr("d", linkage)
+      .attr("fill", link.color || "#999")
+      .attr("width", 1)
+      .attr("marker-end", "url(#arrow)");
   });
 
   function intern(value: any) {
@@ -102,7 +115,6 @@ function CreateGraph(
       ? value.valueOf()
       : value;
   }
-  console.log(Object.assign(svg.node() || {}, { scales: { colors } }))
   return Object.assign(svg.node() || {}, { scales: { colors } });
 }
 

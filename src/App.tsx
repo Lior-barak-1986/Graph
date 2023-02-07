@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 
 // import logo from "./logo.svg";
 import "./App.css";
+import Graph from "./Components/Graph";
 import { Data, Link, Node } from "./Interfaces/Node";
 import { fetchData } from "./lib/api";
 import CreateGraph from "./lib/d3";
@@ -27,21 +28,10 @@ function App() {
       );
     };
     fetchServer();
-  }, []);
-  useEffect(() => {
-    if (svg.current) {
-      nodes &&
-        links &&
-        svg.current.appendChild(CreateGraph({dataLinks: links,data: nodes},{}));
-    }
-  }, [nodes,links]);
-
-  
+  }, []);  
   return (
     <div className="App">
-      {}
-      <div ref={svg} >
-        </div>
+      <Graph nodes={nodes} links={links}/>
     </div>
   );
 }
