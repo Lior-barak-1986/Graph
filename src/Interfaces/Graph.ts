@@ -3,8 +3,8 @@ import { Link } from "./Link";
 import { Node } from "./Node";
 
 export interface Data{
-    links: Link,
-    nodes: Node
+    links: Array<Link>,
+    nodes: Array<Node>
 }
 
 
@@ -28,4 +28,5 @@ export interface ExtraData{
     width?: number, // outer width, in pixels
     height?: number, // outer height, in pixels
     invalidation?: any, // when this promise resolves, stop the simulation
+    openToolTip: (location: Array<number>) => void,
   }

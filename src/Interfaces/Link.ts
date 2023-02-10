@@ -9,8 +9,8 @@ export interface Link {
   }
 
   export interface LinkD3{
-    source: number[];
-    target: number[];
+    source: [number,number];
+    target: [number,number];
     color: string;
     description: string | undefined;
     weight: number;

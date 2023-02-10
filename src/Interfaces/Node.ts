@@ -5,7 +5,7 @@ export interface Node {
   description: string | undefined;
   fill: boolean | undefined;
   id: string;
-  properties: Object | null;
+  properties: Object | undefined;
   shape: string | undefined;
   size?: number;
 }
