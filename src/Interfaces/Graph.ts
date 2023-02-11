@@ -1,6 +1,6 @@
 import * as d3 from "d3";
 import { Link } from "./Link";
-import { Node } from "./Node";
+import { Node, NodeD3 } from "./Node";
 
 export interface Data{
     links: Array<Link>,
@@ -28,5 +28,5 @@ export interface ExtraData{
     width?: number, // outer width, in pixels
     height?: number, // outer height, in pixels
     invalidation?: any, // when this promise resolves, stop the simulation
-    openToolTip: (location: Array<number>) => void,
+    openToolTip: (location: Array<number>, node:NodeD3) => void,
   }

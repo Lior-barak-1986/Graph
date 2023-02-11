@@ -1,7 +1,8 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "../Interfaces/Link";
-import { Node } from "../Interfaces/Node";
+import { Node, NodeD3 } from "../Interfaces/Node";
 import CreateGraph from "../lib/d3";
+import NodeToDisplay from "./Node";
 import ToolTip from "./ToolTip";
 
 export interface IGraphProps {
@@ -11,32 +12,23 @@ export interface IGraphProps {
 
 export default function Graph(props: IGraphProps) {
   const { links, nodes } = props;
-  const svg = useRef<HTMLDivElement>(null);
-  const [openToolTip, setOpenToolTip] = useState<boolean>(false);
   const [location, setLocation] = useState<Array<number>>([]);
-  const moveHover = (location: Array<number>) => {
+  const [toolTipObject, setToolTipObject] = useState<NodeD3 | null>(null);
+  const moveHover = (location: Array<number>, node: NodeD3) => {
     setLocation(location);
-    setOpenToolTip(true);
+    setToolTipObject(node);
   };
   useEffect(() => {
-    if (nodes.length && links.length && svg && svg.current) {
-      svg.current.appendChild(
-        //@ts-ignore
-        CreateGraph(
-          { dataLinks: links, data: nodes },
-          { openToolTip: moveHover }
-        )
+    if (nodes.length && links.length)
+      CreateGraph(
+        { dataLinks: links, data: nodes },
+        { openToolTip: moveHover }
       );
-    }
   }, [nodes, links]);
-
-  {
-    /*@ts-ignore*/
-  }
   return (
     <>
-      <div ref={svg}></div>
-      {openToolTip && (
+      <svg></svg>
+      {toolTipObject && (
         <div
           style={{
             position: "absolute",
@@ -44,7 +36,9 @@ export default function Graph(props: IGraphProps) {
             left: location[0],
           }}
         >
-          <ToolTip />
+          <ToolTip>
+            <NodeToDisplay node={toolTipObject} />
+          </ToolTip>
         </div>
       )}
     </>

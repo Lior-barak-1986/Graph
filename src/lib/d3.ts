@@ -13,7 +13,7 @@ function mapNodesToD3(
   width: number,
   height: number
 ): Array<NodeD3> {
-  return d3.map(data, (elem, i) => ({
+  return data.map((elem, i) => ({
     id: elem.id,
     shape: elem.shape,
     color: elem.color || "black",
@@ -30,7 +30,7 @@ function linkNodesToD3(
   dataLinks: Array<Link>,
   nodes: Array<NodeD3>
 ): Array<LinkD3 | undefined> {
-  return d3.map(dataLinks, (link) => {
+  return dataLinks.map((link) => {
     const nodeSource = nodes.find((node) => node.id === link.source);
     const nodeTarget = nodes.find((node) => node.id === link.target);
     if (!nodeSource || !nodeTarget) return;
@@ -67,8 +67,8 @@ function linkNodesToD3(
 
 function createNodes(
   nodes: Array<NodeD3>,
-  svg: d3.Selection<SVGSVGElement, undefined, null, undefined>,
-  openToolTip: (location: Array<number>) => void
+  svg: d3.Selection<d3.BaseType, unknown, HTMLElement, any>,
+  openToolTip: (location: Array<number>,node: NodeD3) => void
 ) {
   nodes.forEach((node) => {
     svg
@@ -86,21 +86,17 @@ function createNodes(
       .attr("y", node.y)
       .attr("width", node.size || 5)
       .attr("height", node.size || 5)
-      .on("mouseover", (e: any) => {
-        const { layerX, layerY } = e;
-        openToolTip([layerX, layerY]);
-      });
+      .on("mouseover", (e:any,node ) => openToolTip( [e.layerX, e.layerY],node));
   });
 }
 
 function makeArrowByColor(
-  svg: d3.Selection<SVGSVGElement, undefined, null, undefined>
+  svg: d3.Selection<d3.BaseType, unknown, HTMLElement, any>
 ) {
   const memo: { [key: string]: string } = {};
   return (color: string) => {
-    const key = color;
-    if (!memo[key]) {
-      memo[key] = `url(#arrow${color})`;
+    if (!memo[color]) {
+      memo[color] = `url(#arrow${color})`;
       svg
         .append("defs")
         .append("marker")
@@ -115,22 +111,22 @@ function makeArrowByColor(
         .append("path")
         .attr("d", " M 0 0 L 10 5 L 0 10 z");
     }
-    return memo[key];
+    return memo[color];
   };
 }
 
 function createLinkWithArrowToNodes(
   links: Array<LinkD3 | undefined>,
-  svg: d3.Selection<SVGSVGElement, undefined, null, undefined>
+  svg: d3.Selection<d3.BaseType, unknown, HTMLElement, any>,
+  arrowCreator: (color: string) => string
 ) {
-  const arrowCreator = makeArrowByColor(svg);
-  const Gen = d3.line();
+  // const arrowCreator = makeArrowByColor(svg);
   links.forEach((link) => {
     link &&
       svg
         .append("path")
         .attr("stroke", link.color || "#99")
-        .attr("d", Gen([link.source, link.target]))
+        .attr("d", d3.line()([link.source, link.target]))
         .attr("marker-end", arrowCreator(link.color));
   });
 }
@@ -147,13 +143,14 @@ function CreateGraph(
   const nodes = mapNodesToD3(data, width, height);
   const links = linkNodesToD3(dataLinks, nodes);
   const svg = d3
-    .create("svg")
+    .select("svg")
     .attr("width", width)
     .attr("height", height)
     .attr("viewBox", [-width / 2, -height / 2, width, height])
     .attr("style", "max-width: 100%; height: auto;");
+  const arrowCreator = makeArrowByColor(svg);
   createNodes(nodes, svg, openToolTip);
-  createLinkWithArrowToNodes(links, svg);
+  createLinkWithArrowToNodes(links, svg, arrowCreator);
   return Object.assign(svg.node() || {}, { scales: { colors } });
 }
 
